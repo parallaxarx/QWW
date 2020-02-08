@@ -29,45 +29,115 @@ widthLabelHistory = widthWindow*3//8- 2*board
 hightLabelHistory=hightWindow*7//8- 2*board
 
 class Main(QWidget):
-    #работа калькулятора
+    # Работа калькулятора с помощью клавиатуры
     def keyPressEvent(self, event):
-        if(str(event.key()) == "16777220"):
-            try :
-                if "-" not in self.labelSmall.text():
-                    output = (self.labelBig.text()+self.labelSmall.text())
-                else:
-                    output = (self.labelBig.text()+'('+self.labelSmall.text()+')')
-                countOpenBrackets=output.count("(")
-                countClosedBrackets=output.count(")")
-                if countOpenBrackets>countClosedBrackets:
-                    output+=(countOpenBrackets-countClosedBrackets)*")"
+        # Двумерный массив сопоставления кодов клавиш к их ключам: 1строка - код, 2строка - ключ
+        arrayOfKeys = [['48','49','50','51','52','53','54','55','56','57','16777220','43','45','42','47','16777221','16777219','42','40','41', '46'],
+                       ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ,'='       ,'+', '-' , '×','÷',  '='      , '<',      '×',  '(', ')', '.']]
+        if (str(event.key()) in arrayOfKeys[0]):
+            for ind in range(len(arrayOfKeys[0])):
+                if str(event.key()) == arrayOfKeys[0][ind]:
+                    key = arrayOfKeys[1][ind]
+                    # Счёт
+                    if key == "=":
+                        try :
+                            if "-" not in self.labelSmall.text():
+                                output = (self.labelBig.text()+self.labelSmall.text())
+                            else:
+                                output = (self.labelBig.text()+'('+self.labelSmall.text()+')')
+                            countOpenBrackets=output.count("(")
+                            countClosedBrackets=output.count(")")
+                            if countOpenBrackets>countClosedBrackets:
+                                output+=(countOpenBrackets-countClosedBrackets)*")"
 
-                result = eval("*".join(("/".join(("**".join(output.split("^"))).split("÷"))).split("×")))
-                # result= output.split("^")
-                # result= "**".join(result)
-                self.labelBig.setText(output+"=")
-                self.labelSmall.setText(str(result))
-                #добавление в labelHistory
-                historyBefore=(output+"="+str(result))
-                historyAfter=''
-                counter=0
-                for char in historyBefore:
-                    counter+=1
-                    historyAfter+=char
-                    if counter%21==0:
-                         historyAfter+='\n'
-                         counter=0
-                    elif char == "=":
-                        historyAfter=historyAfter[:-1]+'\n='
-                        counter=0
-                self.labelHistory.setText(historyAfter+"\n\n"+self.labelHistory.text())
-            except:
-                print(output)
+                            result = eval("*".join(("/".join(("**".join(output.split("^"))).split("÷"))).split("×")))
+                            # result= output.split("^")
+                            # result= "**".join(result)
+                            self.labelBig.setText(output+"=")
+                            self.labelSmall.setText(str(result))
+                            #добавление в labelHistory
+                            historyBefore=(output+"="+str(result))
+                            historyAfter=''
+                            counter=0
+                            for char in historyBefore:
+                                counter+=1
+                                historyAfter+=char
+                                if counter%21==0:
+                                     historyAfter+='\n'
+                                     counter=0
+                                elif char == "=":
+                                    historyAfter=historyAfter[:-1]+'\n='
+                                    counter=0
+                            self.labelHistory.setText(historyAfter+"\n\n"+self.labelHistory.text())
+                        except:
+                            print(output)
+                    # Цифры
+                    elif key in "1234567890":
+                        if '=' not in self.labelBig.text():
+                            self.labelSmall.setText(self.labelSmall.text()+key)
+                            if self.labelBig.text()!="":
+                                if self.labelBig.text()[-1]==")":
+                                    self.labelBig.setText(self.labelBig.text()+"×")
+
+                        else:
+                            self.labelBig.clear();
+                            self.labelSmall.setText(key)
+                    # Удаление символа BackSpace
+                    elif key=="<":
+                        self.labelSmall.setText(self.labelSmall.text()[:-1])
+                    # Арифметика
+                    elif key in "+-×÷^":
+                        if "-" not in self.labelSmall.text():
+                            if '=' not in self.labelBig.text():
+
+                                if self.labelSmall.text()!='' and (self.labelSmall.text() !="-"):
+                                    self.labelBig.setText(self.labelBig.text()+self.labelSmall.text()+key)
+                                    self.labelSmall.setText("")
+                                else:
+                                    if key=="-":
+                                        self.labelSmall.setText('-')
+                            else:
+                                self.labelBig.setText(self.labelSmall.text()+key)
+                                self.labelSmall.setText("")
+                        else:
+                            if '=' not in self.labelBig.text():
+                                if self.labelSmall.text()!='' and (self.labelSmall.text() !="-"):
+                                    self.labelBig.setText(self.labelBig.text()+'('+self.labelSmall.text()+')'+key)
+                                    self.labelSmall.setText("")
+                                else:
+                                    if key=="-":
+                                        self.labelSmall.setText('-')
+                            else:
+                                self.labelBig.setText('('+self.labelSmall.text()+')'+key)
+                                self.labelSmall.setText("")
+                    # Cкобки
+                    elif key == "(":
+                        if self.labelBig.text() != '':
+                            if self.labelBig.text()[-1] == ')':
+                                self.labelBig.setText(self.labelBig.text() + '*(')
+                            else:
+                                self.labelBig.setText(self.labelBig.text() + '(')
+                        else:
+                            self.labelBig.setText('(')
+                    elif key == ")":
+                            countOpenBrackets = (list(self.labelBig.text())).count('(')
+                            countClosedBrackets = (list(self.labelBig.text())).count(')')
+
+                            if self.labelBig.text() != '':
+                                if self.labelBig.text()[-1] == '(':
+                                    self.labelBig.setText(self.labelBig.text() + '0' + ')')
+                                elif countClosedBrackets < countOpenBrackets:
+                                    self.labelBig.setText(self.labelBig.text() + self.labelSmall.text() + ')')
+                                    self.labelSmall.setText('')
+                    # Точка (исправить)
+                    elif key=="." and key not in self.labelSmall.text():
+                        self.labelSmall.setText(self.labelSmall.text()+key)
+
+
+    # Работа калькулятора с помощью мыши
     def calculation(self):
         sender=self.sender()
         key=sender.text()
-        # self.buttonList[4][4].setAutoDefault(self.buttonList[4][4].click,True)
-        # self.labelSmall.returnPressed.connect(self.buttonList[4][4].click)
         print(key)
 
         #вычесления
@@ -289,7 +359,7 @@ class Main(QWidget):
         self.labelBig.setFont(QFont("Trattatello",size//8))
         self.labelBig.show()
 
-        self.labelSmall=QLineEdit("",self,objectName="labelSmall")
+        self.labelSmall=QLabel("",self,objectName="labelSmall")
         self.labelSmall.resize(widthLabelSmall,hightLabelSmall)
         self.labelSmall.move(board,board+hightWindow//4)
         self.labelSmall.setFont(QFont("Trattatello",size//4))
