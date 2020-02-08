@@ -327,6 +327,12 @@ class Main(QWidget):
                 color:#fff;
                 border: 5px solid;
             }
+            #labelSmall {
+                background-color: #6b0000;
+                border-radius: 20px;
+                color:#fff;
+                border: 5px solid;
+            }
             #labelHistory {
                 background-color: #6b0000;
                 border-radius: 20px;
