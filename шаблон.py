@@ -1,5 +1,6 @@
 """
 Приложение 'Калькулятор'
+Автор: "WildWoodRogue"
 """
 import sys
 from PyQt5.QtWidgets import QApplication,QLabel,QWidget, QPushButton,QMessageBox,QLCDNumber,QLineEdit,QGridLayout
